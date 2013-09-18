@@ -1,0 +1,59 @@
+# Sample migration 1
+1: 
+  author: Matt
+  comment: Creating happy table.
+  tag: 0.1
+  
+  sql: |
+
+    CREATE TABLE `happy` (
+      `happyGuid` char(36) NOT NULL DEFAULT '',
+      PRIMARY KEY (`happyGuid`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  
+  rollback: |
+
+    DROP TABLE happy;
+
+# Sample migration 2
+2: 
+  author: Matt
+  comment: Creating sad table.
+  
+  sql: |
+
+    CREATE TABLE `sad` (
+      `sadGuid` char(36) NOT NULL DEFAULT '',
+      PRIMARY KEY (`sadGuid`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  
+  rollback: |
+
+    DROP TABLE sad;
+
+# Sample migration 3
+3: 
+  author: Steve
+  comment: Adding grumpy column
+  tag: 0.2
+  
+  sql: |
+
+    ALTER TABLE happy ADD `grumpy` BOOL;
+
+  rollback: |
+
+    ALTER TABLE happy DROP grumpy;
+
+# Sample migration 4
+4: 
+  author: Steve Tyler
+  comment: Adding stupid column
+  
+  sql: |
+
+    ALTER TABLE happy ADD `stupid` BOOL;
+
+  rollback: |
+
+    ALTER TABLE happy DROP stupid;

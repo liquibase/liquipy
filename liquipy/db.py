@@ -1,11 +1,14 @@
 import yaml
-import pprint
+import sys
+from changeset import XMLWriter as ChangeSetWriter
+from executor import Executor as LiquibaseExecutor
 
 DEFAULT = {
-  'url': "jdbc:mysql://localhost",
+  'host': "localhost",
   'database': "liquipy_test",
   'username': "root",
-  'password': ""
+  'password': "",
+  'tempDir': "/tmp"
 }
 
 class LiquipyDatabase(object):
@@ -13,14 +16,15 @@ class LiquipyDatabase(object):
   Main interface for Liquipy
   """
 
-  def __init__(self, url=DEFAULT['url'],
+  def __init__(self, host=DEFAULT['host'],
                      database=DEFAULT['database'],
                      username=DEFAULT['username'],
-                     password=DEFAULT['password']):
-    self.url = url
-    self.database = database
-    self.username = username
-    self.password = password
+                     password=DEFAULT['password'],
+                     tempDir=DEFAULT['tempDir']):
+    self.liquibaseExecutor = LiquibaseExecutor(host, database, username, password)
+    self.tempDir = tempDir
+    self.outputXmlChangeLogFilePath = self.tempDir + "/liquipy_changelog.xml"
+
 
 
   def initialize(self, yamlPath):
@@ -31,24 +35,12 @@ class LiquipyDatabase(object):
       msg = "Error parsing input YAML file '%s':\n%s" % (yamlPath, e)
       raise Exception(msg)
 
-    # pprint.pprint(yaml.load(rawYaml))
+    changeSetWriter = ChangeSetWriter(self.outputXmlChangeLogFilePath)
+    changeSetWriter.write(changes)
 
-    changeLog = []
 
-    for changeId in changes.keys():
-      change = changes[changeId]
-      changeSet = {
-        'id': changeId,
-        'author': change['author'],
-        'sql': change['sql'],
-        'rollback': change['rollback'],
-        'comment': change['comment']
-      }
-      changeLog.append({'changeSet': changeSet})
 
-    yamlOut = {'databaseChangelog': changeLog}
+  def update(self):
+    self.liquibaseExecutor.run(self.outputXmlChangeLogFilePath, 'update')
 
-    rawYamlOut = yaml.dump(yamlOut)
-    print rawYamlOut
-    yamlFile = open('/tmp/liquipy.yaml', 'w')
-    yamlFile.write(rawYamlOut)
+
