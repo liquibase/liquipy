@@ -5,6 +5,8 @@ try:
 except ImportError:
   from distutils.core import setup
 
+sdict = {}
+
 execfile('liquipy/version.py', {}, sdict)
 
 sdict.update({
@@ -29,7 +31,8 @@ sdict.update({
     'License :: OSI Approved :: MIT License',
     'Natural Language :: English',
     'Operating System :: OS Independent',
-    'Programming Language :: Python']
+    'Programming Language :: Python'],
+  'zip_safe' : False
 })
 
 setup(**sdict)
