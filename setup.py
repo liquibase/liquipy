@@ -1,9 +1,20 @@
 #!/usr/bin/python
 
 try:
-  from setuptools import setup
+  from setuptools import setup, Command
 except ImportError:
-  from distutils.core import setup
+  from distutils.core import setup, Command
+
+class PyTest(Command):
+    user_options = []
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
+    def run(self):
+        import sys,subprocess
+        errno = subprocess.call(['py.test'])
+        raise SystemExit(errno)
 
 sdict = {}
 
@@ -19,8 +30,10 @@ sdict.update({
   'keywords' : ['sql', 'migrations', 'liquibase'],
   'license' : 'MIT',
   'install_requires': [
+    'mock',
     'PyYAML',
-    'nose'],
+    'pytest',
+    'unittest2'],
   'test_suite': 'tests.unit',
   'packages' : ['liquipy'],
   'data_files': [('externals', ['externals/liquibase.jar', 'externals/mysql-connector-java-5.1.17-bin.jar'])],
@@ -32,7 +45,8 @@ sdict.update({
     'Natural Language :: English',
     'Operating System :: OS Independent',
     'Programming Language :: Python'],
-  'zip_safe' : False
+  'zip_safe' : False,
+  'cmdclass' : {'test': PyTest},
 })
 
 setup(**sdict)
