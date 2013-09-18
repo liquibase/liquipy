@@ -1,0 +1,12 @@
+# Sample migration 5
+5: 
+  author: Steve
+  comment: Adding dog column
+
+  sql: |
+
+    ALTER TABLE happy ADD `dog` BOOL;
+
+  rollback: |
+
+    ALTER TABLE happy DROP dog;
