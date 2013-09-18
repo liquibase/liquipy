@@ -36,7 +36,7 @@ class XMLWriter(object):
   def write(self, changes):
     # data structure to xml
     xmlOut = ""
-    for changeSetId in changes.keys():
+    for changeSetId in sorted(changes.keys()):
       changeSet = changes[changeSetId]
       self._validateChangeSet(changeSetId, changeSet, self.REQUIRED)
       xmlOut += CHANGESET_TEMPLATE % (
@@ -56,3 +56,4 @@ class XMLWriter(object):
     for attribute in requiredAttributes:
       if attribute not in changeSet:
         raise Exception(('ChangeSet "%s" missing required attribute "%s"') % (str(id), attribute))
+
