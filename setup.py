@@ -5,16 +5,11 @@ try:
 except ImportError:
   from distutils.core import setup
 
-with open('README-pypi.rst', 'r') as inp:
-  sdict = {
-    'long_description' : inp.read()
-  }
-
 execfile('liquipy/version.py', {}, sdict)
 
 sdict.update({
   'name' : 'liquipy',
-  'description' : 'Python client for CEPT API',
+  'description' : 'a Python wrapper for Liquibase (see http://www.liquibase.org/)',
   'url': 'http://github.com/groksolutions/liquipy',
   'download_url' : 'https://pypi.python.org/packages/source/g/liquipy/liquipy-%s.tar.gz' % sdict['version'],
   'author' : 'Matthew Taylor',
