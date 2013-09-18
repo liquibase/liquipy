@@ -47,9 +47,13 @@ class LiquipyDatabase(object):
       relativeTargetDir = changes['include']['directory']
       currentDir = join(split(yamlPath)[:-1])[0]
       targetDir = join(currentDir,relativeTargetDir)
+      try:
+        dirFiles = listdir(targetDir)
+      except Exception:
+        raise Exception('Included directory "' + targetDir + '" does not exist')
       migrationFiles = [ 
         join(targetDir, f) 
-        for f in listdir(targetDir) 
+        for f in dirFiles
         if f.endswith('.yml')
       ]
       for includedMigration in migrationFiles:

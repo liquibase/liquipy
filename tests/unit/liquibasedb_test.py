@@ -139,5 +139,24 @@ class LiquipyDatabaseTest(unittest.TestCase):
 
 
   def testIncludeWithMissingDirectoryRaisesException(self):
-    self.fail()
+    mockMasterYaml = """include:
+  directory: migrations
+"""
+
+    masterChangeSetFilePath = '/foo/bar/baz/master_changeset.yml'
+
+    db = Database()
+
+    def side_effect(filePath, mode):
+      mockFile = Mock()
+      mockFile.read = Mock(return_value=mockMasterYaml)
+      return mockFile
+
+    mockOpen = mock_open()
+    mockOpen.side_effect = side_effect
+
+    with patch('liquipy.db.open', mockOpen, create=True):
+      with self.assertRaisesRegexp(Exception, 'Included directory "/foo/bar/baz/migrations" does not exist'):
+        changes = db.inputYamlToChangeSets(masterChangeSetFilePath)
+
 
