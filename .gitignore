@@ -1,1 +1,6 @@
+.DS_Store
+build
+dist
+liquipy.egg-info
+sample/liquipy_changelog.xml
 *.pyc
