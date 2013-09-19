@@ -81,6 +81,30 @@ You can rollback to a specific tag easily.
 
     db.rollback('tagName')
 
+If you specify an nonexistent tag name, you'll get a Liquibase error like this:
+
+    Error running liquibase! See output below:
+
+    INFO 9/18/13 10:23 PM:liquibase: Successfully acquired change log lock
+    INFO 9/18/13 10:24 PM:liquibase: Reading from test_liquipy.DATABASECHANGELOG
+    INFO 9/18/13 10:24 PM:liquibase: Successfully released change log lock
+    Liquibase rollback Failed: Could not find tag '0.2s' in the database
+    SEVERE 9/18/13 10:24 PM:liquibase: Could not find tag '0.2s' in the database
+    liquibase.exception.RollbackFailedException: Could not find tag '0.2s' in the database
+      at liquibase.changelog.filter.AfterTagChangeSetFilter.<init>(AfterTagChangeSetFilter.java:28)
+      at liquibase.Liquibase.rollback(Liquibase.java:325)
+      at liquibase.integration.commandline.Main.doMigration(Main.java:875)
+      at liquibase.integration.commandline.Main.main(Main.java:138)
+
+
+    For more information, use the --logLevel flag
+
+    The Liquibase XML changelog file used to perform this operation is here: ./liquipy_changelog.xml
+
+At the end of the error message, the location of the actual Liquibase XML file is stated for debugging.
+
+### Listing Tags
+
 You can also get a list of existing tags (after initialization).
 
     db.getTags()
