@@ -2,7 +2,7 @@
 1: 
   author: Matt
   comment: Creating happy table.
-  tag: 0.1
+  tag: "0.1"
 
   sql: |
 
@@ -35,7 +35,7 @@
 3: 
   author: Steve
   comment: Adding grumpy column
-  tag: 0.2
+  tag: "0.2"
 
   sql: |
 
