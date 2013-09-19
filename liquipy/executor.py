@@ -1,4 +1,4 @@
-from subprocess import call
+from subprocess import Popen, PIPE, STDOUT
 from pkg_resources import Requirement, resource_filename
 
 RUN_TEMPLATE = """java -jar %s \
@@ -31,4 +31,18 @@ class Executor(object):
       self.liquibaseJar, self.mysqlJar, changeLogFilePath, self.host, self.database, self.username, self.password)
     cmd = cmd + ' '.join(args)
     # print('\n' + cmd + '\n')
-    call(cmd, shell=True)
+
+    p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, close_fds=True)
+    p.wait()
+    output = p.stdout.read()
+
+    if p.returncode > 0:
+      raise Exception("""
+
+Error running liquibase! See output below:
+
+%s
+The Liquibase XML changelog file used to perform this operation is here: %s
+""" % (output, changeLogFilePath)
+      )
+    print output
