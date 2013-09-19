@@ -8,12 +8,12 @@ Liquipy is a small python wrapper around [Liquibase](http://www.liquibase.org/) 
 
 #### YAML Changelogs
 
-In Liquipy, changelog is a list of database migrations in SQL that contain the DDL to update the schema. It should also contain the SQL to rollback to the previous state, which allows users to navigate to any spot within the changelog. Each changelog contains one or more numbered changesets, identified by an integer as its key.
+In Liquipy, a changelog is a list of database migrations in SQL that contain the DDL to update the schema. It should also contain the SQL to rollback to the previous state, which allows users to navigate to any spot within the changelog. Each changelog contains one or more numbered changesets, identified by an integer as its key.
 
 Here's an example of a changelog with one changeset.
 
     1: 
-      author: Matt Taylor
+      author: Richard Smoker
       comment: Creating happy table.
       tag: version-0.1
       sql: |
@@ -24,7 +24,40 @@ Here's an example of a changelog with one changeset.
       rollback: |
         DROP TABLE happy;
 
-This changelog contains only one changeset. The id of the changeset is `1`. The `author`, `comment`, `sql`, and `rollback` properties of the changeset are **required**. The `tag` property is _optional_, but when present will create a navigable point within the entire changelog that is easy to rollback to. This tag usually corresponds directly with the version of the software product the database schema is associated with.
+This changelog contains only one changeset. The id of the changeset is `1`. The `author`, `comment`, `sql`, and `rollback` properties of the changeset are **required**. The `tag` property is _optional_, but when present will create a navigable point within the entire changelog that is easy to rollback to. This tag usually corresponds directly with the version of the software product the database schema is associated with. The value of the tag can be any string. To use a value such as `0.1`, you should enter this in quotes so it is not interpreted as a number (as seen in the additional sample below).
+
+Here is another changelog with multiple changesets, comments, and more whitespace:
+
+    # Sample migration 2
+    2: 
+      author: Rocky Racoon
+      comment: Creating sad table.
+
+      sql: |
+
+        CREATE TABLE `sad` (
+          `sadGuid` char(36) NOT NULL DEFAULT '',
+          PRIMARY KEY (`sadGuid`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+      rollback: |
+
+        DROP TABLE sad;
+
+    # Sample migration 3
+    3: 
+      author: Richard Smoker
+      comment: Adding grumpy column
+      tag: "0.2"
+
+      sql: |
+
+        ALTER TABLE happy ADD `grumpy` BOOL;
+
+      rollback: |
+
+        ALTER TABLE happy DROP grumpy;
+
 
 ##### Changelog Includes
 
@@ -48,7 +81,7 @@ The contents of `master_changelog.yml` could simple contain an inclusion of the 
 
 This could allow users to break apart their changesets into temporal or other logical units. Changelogs included in this fashion can also themselves include other directories.
 
-#### Changeset Order Matters
+#### Changeset ID Order Matters
 
 Each changeset has an id, which is the only ordering that matters. All changesets within the changelog, no matter what order they appear sequentially, or what order they are included, will be executed in the sorted order of their integer ids.
 
@@ -77,7 +110,7 @@ Liquipy needs a temporary directory to write XML files for Liquibase. If a `temp
 
 ### Rollbacks
 
-You can rollback to a specific tag easily.
+You can rollback to a specific tag easily. The tag name specified must have been included as the `tag` property of a changeset within the changelog.
 
     db.rollback('tagName')
 
