@@ -31,9 +31,9 @@ class LiquipyDatabase(object):
 
 
   def initialize(self, yamlPath):
-    changes = self.inputYamlToChangeSets(yamlPath)
+    self.changes = self.inputYamlToChangeSets(yamlPath)
     changeSetWriter = ChangeSetWriter(self.outputXmlChangeLogFilePath)
-    changeSetWriter.write(changes)
+    changeSetWriter.write(self.changes)
 
 
   def inputYamlToChangeSets(self, yamlPath):
@@ -64,5 +64,19 @@ class LiquipyDatabase(object):
 
 
   def update(self):
+    print "Running all migrations..."
     self.liquibaseExecutor.run(self.outputXmlChangeLogFilePath, 'update')
+
+
+  def rollback(self, tagName):
+    print "Rolling back to %s..." % (tagName,)
+    self.liquibaseExecutor.run(self.outputXmlChangeLogFilePath, 'rollback', tagName)
+
+
+  def getTags(self):
+    return [
+      {'tag':self.changes[c]['tag'], 'changeSet': c} 
+      for c in self.changes.keys() 
+      if 'tag' in self.changes[c]
+    ]
 
