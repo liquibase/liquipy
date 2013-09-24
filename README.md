@@ -153,3 +153,7 @@ This returns a list of dicts with each tag's name and the changeset it is associ
 ### Sample
 
 For a sample of usage, see the `sample` directory. In contains examples of most of the concepts described above.
+
+## License
+
+This software carries the Apache License V2.0 to adhere to the same licensing standard as the bundled Liquibase software.
