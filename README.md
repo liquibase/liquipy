@@ -6,6 +6,10 @@
 
 Liquipy is a small python wrapper around [Liquibase](http://www.liquibase.org/) that exposes a much simpler changelog format in [YAML](http://yaml.org/) instead of XML. This module currently only works for MySQL migrations.
 
+### Installation
+
+    python setup.py install
+
 #### YAML Changelogs
 
 In Liquipy, a changelog is a list of database migrations in SQL that contain the DDL to update the schema. It should also contain the SQL to rollback to the previous state, which allows users to navigate to any spot within the changelog. Each changelog contains one or more numbered changesets, identified by an integer as its key.
