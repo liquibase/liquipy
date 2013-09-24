@@ -28,7 +28,7 @@ sdict.update({
   'author' : 'Matthew Taylor',
   'author_email' : 'matt@groksolutions.com',
   'keywords' : ['sql', 'migrations', 'liquibase'],
-  'license' : 'MIT',
+  'license' : 'Apache',
   'install_requires': [
     'mock',
     'PyYAML',
@@ -41,7 +41,7 @@ sdict.update({
     'Development Status :: 1 - Planning',
     'Environment :: Console',
     'Intended Audience :: Developers',
-    'License :: OSI Approved :: MIT License',
+    'License :: OSI Approved :: Apache License',
     'Natural Language :: English',
     'Operating System :: OS Independent',
     'Programming Language :: Python'],
