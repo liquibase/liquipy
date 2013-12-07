@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from subprocess import Popen, PIPE, STDOUT
+import subprocess
 from pkg_resources import resource_filename
 
 RUN_TEMPLATE = """java -jar %s \
@@ -50,20 +50,21 @@ class Executor(object):
     cmd = cmd + " ".join(args)
     # print("\n" + cmd + "\n")
 
-    p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, close_fds=True)
-    # TODO Need to use p.communicate() BEFORE p.wait() to avoid deadlock in case
-    #   the process spits out more STDERR/STDOUT data than there is room for in
-    #   the pipe's buffer (which is not that large)
+    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT, close_fds=True)
+    # Use p.communicate() BEFORE p.wait() to avoid deadlock in case the process
+    # spits out more STDERR/STDOUT data than there is room for in the pipe's
+    # buffer (which is not that large)
+    (output, _stderr) = p.communicate()
     p.wait()
-    output = p.stdout.read()
 
     if p.returncode != 0:
       raise Exception("""
 
-Error running liquibase! See output below:
+Error running liquibase (returncode=%s)! See output below:
 
 %s
 The Liquibase XML changelog file used to perform this operation is here: %s
-""" % (output, changeLogFilePath)
+""" % (p.returncode, output, changeLogFilePath)
       )
     print output
