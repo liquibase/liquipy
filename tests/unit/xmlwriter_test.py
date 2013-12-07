@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-import os
 import unittest2 as unittest
 
 from mock import patch, mock_open, MagicMock
 
-import liquipy
 from liquipy.changeset import XMLWriter
 
 
@@ -200,7 +198,9 @@ Rollback 4
 
     writer = XMLWriter('')
 
-    with self.assertRaisesRegexp(Exception, "ChangeSet '1' missing required attribute 'author'"):
+    with self.assertRaisesRegexp(
+        Exception,
+        "ChangeSet '1' missing required attribute 'author'"):
       writer.write(changes)
 
 
@@ -214,7 +214,9 @@ Rollback 4
 
     writer = XMLWriter('')
 
-    with self.assertRaisesRegexp(Exception, "ChangeSet '1' missing required attribute 'comment'"):
+    with self.assertRaisesRegexp(
+      Exception,
+      "ChangeSet '1' missing required attribute 'comment'"):
       writer.write(changes)
 
 
@@ -228,7 +230,9 @@ Rollback 4
 
     writer = XMLWriter('')
 
-    with self.assertRaisesRegexp(Exception, "ChangeSet '1' missing required attribute 'sql'"):
+    with self.assertRaisesRegexp(
+        Exception,
+        "ChangeSet '1' missing required attribute 'sql'"):
       writer.write(changes)
 
 
@@ -242,7 +246,9 @@ Rollback 4
 
     writer = XMLWriter('')
 
-    with self.assertRaisesRegexp(Exception, "ChangeSet '1' missing required attribute 'rollback'"):
+    with self.assertRaisesRegexp(
+        Exception,
+        "ChangeSet '1' missing required attribute 'rollback'"):
       writer.write(changes)
 
 
