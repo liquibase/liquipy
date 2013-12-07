@@ -30,6 +30,9 @@ class LiquipyDatabase(object):
   """
   Main interface for Liquipy
   """
+  
+  _GENERATED_CHANGELOG_FILE_NAME = "liquipy_changelog.xml"
+  """ This is the name of the generated changlog xml file """
 
   def __init__(self, host=DEFAULT['host'],
                      database=DEFAULT['database'],
@@ -39,8 +42,9 @@ class LiquipyDatabase(object):
     self.liquibaseExecutor = LiquibaseExecutor(host, database, username,
                                                password)
     self.tempDir = tempDir
-    self.outputXmlChangeLogFilePath = os.path.join(self.tempDir,
-                                                   "liquipy_changelog.xml")
+    self.outputXmlChangeLogFilePath = os.path.join(
+      self.tempDir,
+      self._GENERATED_CHANGELOG_FILE_NAME)
     self.changes = None
 
 

@@ -51,10 +51,13 @@ class Executor(object):
     # print("\n" + cmd + "\n")
 
     p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, close_fds=True)
+    # TODO Need to use p.communicate() BEFORE p.wait() to avoid deadlock in case
+    #   the process spits out more STDERR/STDOUT data than there is room for in
+    #   the pipe's buffer (which is not that large)
     p.wait()
     output = p.stdout.read()
 
-    if p.returncode > 0:
+    if p.returncode != 0:
       raise Exception("""
 
 Error running liquibase! See output below:
