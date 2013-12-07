@@ -120,7 +120,7 @@ class LiquipyDatabaseTest(unittest.TestCase):
     mockListdir = Mock(return_value=['include1.yml', 'other.thing'])
 
     with patch('liquipy.db.open', mockOpen, create=True):
-      with patch('liquipy.db.listdir', mockListdir, create=True):
+      with patch('liquipy.db.os.listdir', mockListdir, create=True):
         changes = db.inputYamlToChangeSets(masterChangeSetFilePath)
 
     mockListdir.assert_called_once_with('/foo/bar/baz/migrations')
