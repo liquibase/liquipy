@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import unittest2 as unittest
 
@@ -5,6 +6,7 @@ from mock import patch, mock_open, MagicMock
 
 import liquipy
 from liquipy.changeset import XMLWriter
+
 
 class XMLWriterTest(unittest.TestCase):
   
@@ -47,7 +49,6 @@ Rollback
 
     mockOpen.assert_called_once_with('outputFilePath', 'w')
     self.assertEqual(expected, fileWriteArgs[0])
-
 
 
   def testOneSimpleChangeSetWithTagSuccess(self):
@@ -93,7 +94,6 @@ Rollback
 
     mockOpen.assert_called_once_with('outputFilePath', 'w')
     self.assertEqual(expected, fileWriteArgs[0])
-
 
 
   def testManyChangeSetsSuccess(self):
@@ -187,8 +187,6 @@ Rollback 4
     self.assertEqual(expected, fileWriteArgs[0])
 
 
-
-
   def testWriterRaisesExceptionWhenAuthorMissing(self):
     changes = {'1': {
       'comment': 'Comment',
@@ -243,3 +241,8 @@ Rollback 4
 
     with self.assertRaisesRegexp(Exception, 'ChangeSet "1" missing required attribute "rollback"'):
       writer.write(changes)
+
+
+
+if __name__ == '__main__':
+  unittest.main()

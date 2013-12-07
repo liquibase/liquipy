@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import unittest2 as unittest
 
@@ -35,3 +36,8 @@ class LiquipySampleTest(unittest.TestCase):
     self.assertTrue(LiquibaseExecutorMock.return_value.run.called)
     LiquibaseExecutorMock.return_value.run.assert_called_once_with(
         ANY, "update")
+
+
+
+if __name__ == '__main__':
+  unittest.main()

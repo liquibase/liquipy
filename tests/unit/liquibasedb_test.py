@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import unittest2 as unittest
 
 from mock import patch, mock_open, Mock, MagicMock
@@ -160,3 +161,6 @@ class LiquipyDatabaseTest(unittest.TestCase):
         changes = db.inputYamlToChangeSets(masterChangeSetFilePath)
 
 
+
+if __name__ == '__main__':
+  unittest.main()
