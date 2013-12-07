@@ -10,17 +10,17 @@ from liquipy.executor import Executor as LiquibaseExecutor
 class LiquipySampleTest(unittest.TestCase):
   def setUp(self):
     self.pathToChangelog = os.path.realpath(os.path.join(
-      os.path.dirname(__file__), 
+      os.path.dirname(__file__),
       "../../sample/changelog.yml"))
   
   @patch("liquipy.db.LiquibaseExecutor", autospec=LiquibaseExecutor)
-  def testSample(self, LiquibaseExecutorMock):
-    """ Simple unit test demonstrating common use, mirroring the bundled sample 
+  def testSample(self, liquibaseExecutorClassMock):
+    """ Simple unit test demonstrating common use, mirroring the bundled sample
     """
     
     db = liquipy.Database(
-      host="localhost", 
-      database="test_liquipy", 
+      host="localhost",
+      database="test_liquipy",
       username="root",
       tempDir=".")
 
@@ -28,13 +28,13 @@ class LiquipySampleTest(unittest.TestCase):
     
     db.update()
 
-    # Basic assertions on use of liquipy.executor.Executor 
+    # Basic assertions on use of liquipy.executor.Executor
     
-    self.assertTrue(LiquibaseExecutorMock.called)
-    LiquibaseExecutorMock.assert_called_once_with(
+    self.assertTrue(liquibaseExecutorClassMock.called)
+    liquibaseExecutorClassMock.assert_called_once_with(
         "localhost", "test_liquipy", "root", ANY)
-    self.assertTrue(LiquibaseExecutorMock.return_value.run.called)
-    LiquibaseExecutorMock.return_value.run.assert_called_once_with(
+    self.assertTrue(liquibaseExecutorClassMock.return_value.run.called)
+    liquibaseExecutorClassMock.return_value.run.assert_called_once_with(
         ANY, "update")
 
 
