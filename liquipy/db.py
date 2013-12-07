@@ -12,18 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import yaml
 import os
+import tempfile
+import yaml
 
 from liquipy.changeset import XMLWriter as ChangeSetWriter
 from liquipy.executor import Executor as LiquibaseExecutor
 
 DEFAULT = {
   "host": "localhost",
+  # TODO: we shouldn't have test settings in production code.
   "database": "liquipy_test",
   "username": "root",
-  "password": "",
-  "tempDir": "/tmp"
+  "password": ""
 }
 
 class LiquipyDatabase(object):
@@ -38,21 +39,15 @@ class LiquipyDatabase(object):
                      database=DEFAULT["database"],
                      username=DEFAULT["username"],
                      password=DEFAULT["password"],
-                     tempDir=DEFAULT["tempDir"]):
+                     tempDir=None):
     self.liquibaseExecutor = LiquibaseExecutor(host, database, username,
                                                password)
     self.tempDir = tempDir
-    self.outputXmlChangeLogFilePath = os.path.join(
-      self.tempDir,
-      self._GENERATED_CHANGELOG_FILE_NAME)
     self.changes = None
-
 
 
   def initialize(self, yamlPath):
     self.changes = self.inputYamlToChangeSets(yamlPath)
-    changeSetWriter = ChangeSetWriter(self.outputXmlChangeLogFilePath)
-    changeSetWriter.write(self.changes)
 
 
   def inputYamlToChangeSets(self, yamlPath):
@@ -78,20 +73,69 @@ class LiquipyDatabase(object):
       ]
       for includedMigration in migrationFiles:
         includeChanges = self.inputYamlToChangeSets(includedMigration)
+        # TODO Need validation to make sure that the same ID is not reused!
+        #   Issue https://github.com/GrokSolutions/liquipy/issues/15
         changes.update(includeChanges)
       del changes["include"]
     return changes
 
 
+  def _getTempXMLChangeLogFilePath(self):
+    """
+    retval: filepath to be used for the generated ChangeLog XML file; MOTE: if
+      tempDir was not specified by the user via constructor (self.tempDir is
+      None), then an empty file will be created via tempfile.mkstemp as a
+      place-holder for avoiding tempfile race conditions, and the caller is
+      responsible for deleting that file
+    """
+    if self.tempDir is not None:
+      # Generate the path inside user-supplied tempDir
+      tempXMLChangeLogFilePath = os.path.join(
+        self.tempDir,
+        self._GENERATED_CHANGELOG_FILE_NAME)
+    else:
+      # Safely create a temp file and return its path
+      (tempFD, tempXMLChangeLogFilePath) = tempfile.mkstemp(
+        suffix=self._GENERATED_CHANGELOG_FILE_NAME)
+      # Don't need the fd, so close it
+      os.close(tempFD)
+    
+    return tempXMLChangeLogFilePath
+
+
   def update(self):
     print "Running all migrations..."
-    self.liquibaseExecutor.run(self.outputXmlChangeLogFilePath, "update")
+    
+    tempXMLChangeLogFilePath = self._getTempXMLChangeLogFilePath()
+    try:
+      ChangeSetWriter(tempXMLChangeLogFilePath).write(self.changes)
+      
+      self.liquibaseExecutor.run(tempXMLChangeLogFilePath, "update")
+    except:
+      # On error, leave the genearted changelog file in place for debugging
+      raise
+    else:
+      # Delete the generated changelog file if the user didn't provide tempDir
+      if self.tempDir is None:
+        os.unlink(tempXMLChangeLogFilePath)
 
 
   def rollback(self, tagName):
     print "Rolling back to %s..." % (tagName,)
-    self.liquibaseExecutor.run(self.outputXmlChangeLogFilePath, "rollback",
-                               tagName)
+    
+    tempXMLChangeLogFilePath = self._getTempXMLChangeLogFilePath()
+    try:
+      ChangeSetWriter(tempXMLChangeLogFilePath).write(self.changes)
+      
+      self.liquibaseExecutor.run(tempXMLChangeLogFilePath, "rollback",
+                                 tagName)
+    except:
+      # On error, leave the genearted changelog file in place for debugging
+      raise
+    else:
+      # Delete the generated changelog file if the user didn't provide tempDir
+      if self.tempDir is None:
+        os.unlink(tempXMLChangeLogFilePath)
 
 
   def getTags(self):
