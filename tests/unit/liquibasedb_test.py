@@ -1,20 +1,20 @@
+#!/usr/bin/env python
 import unittest2 as unittest
 
-from mock import patch, mock_open, Mock, MagicMock
+from mock import patch, mock_open, Mock
 
-import liquipy
 from liquipy import Database
 
 class LiquipyDatabaseTest(unittest.TestCase):
 
   def testYamlInlineChanges(self):
-    mockYaml = """1: 
+    mockYaml = """1:
   author: a1
   comment: c1
   tag: t1
   sql: sql
   rollback: rollback
-2: 
+2:
   author: a2
   comment: c2
   sql: sql 2
@@ -31,7 +31,7 @@ class LiquipyDatabaseTest(unittest.TestCase):
     self.assertIn(1, changeKeys)
     self.assertIn(2, changeKeys)
     self.assertNotIn(3, changeKeys)
-    # Just test the structure of one. Other tests around how change sets are 
+    # Just test the structure of one. Other tests around how change sets are
     # created from YAML input are in xmlwriter_test.py.
     changeOne = changes[1]
     self.assertIn('author', changeOne)
@@ -45,7 +45,7 @@ class LiquipyDatabaseTest(unittest.TestCase):
     mockMasterYaml = """include:
   directory: migrations
 """
-    mockIncludedYaml = """1: 
+    mockIncludedYaml = """1:
   author: a1
   comment: c1
   sql: sql
@@ -56,7 +56,7 @@ class LiquipyDatabaseTest(unittest.TestCase):
 
     db = Database()
 
-    def side_effect(filePath, mode):
+    def sideEffect(filePath, _mode):
       mockFile = Mock()
       if filePath == masterChangeSetFilePath:
         mockFile.read = Mock(return_value=mockMasterYaml)
@@ -66,11 +66,11 @@ class LiquipyDatabaseTest(unittest.TestCase):
       return mockFile
 
     mockOpen = mock_open()
-    mockOpen.side_effect = side_effect
+    mockOpen.side_effect = sideEffect
     mockListdir = Mock(return_value=['include1.yml', 'other.thing'])
 
     with patch('liquipy.db.open', mockOpen, create=True):
-      with patch('liquipy.db.listdir', mockListdir, create=True):
+      with patch('liquipy.db.os.listdir', mockListdir, create=True):
         changes = db.inputYamlToChangeSets(masterChangeSetFilePath)
 
     mockListdir.assert_called_once_with('migrations')
@@ -80,7 +80,7 @@ class LiquipyDatabaseTest(unittest.TestCase):
     self.assertNotIn(0, changeKeys)
     self.assertIn(1, changeKeys)
     self.assertNotIn(2, changeKeys)
-    # Just test the structure of one. Other tests around how change sets are 
+    # Just test the structure of one. Other tests around how change sets are
     # created from YAML input are in xmlwriter_test.py.
     changeOne = changes[1]
     self.assertIn('author', changeOne)
@@ -94,7 +94,7 @@ class LiquipyDatabaseTest(unittest.TestCase):
     mockMasterYaml = """include:
   directory: migrations
 """
-    mockIncludedYaml = """1: 
+    mockIncludedYaml = """1:
   author: a1
   comment: c1
   sql: sql
@@ -105,7 +105,7 @@ class LiquipyDatabaseTest(unittest.TestCase):
 
     db = Database()
 
-    def side_effect(filePath, mode):
+    def sideEffect(filePath, _mode):
       mockFile = Mock()
       if filePath == masterChangeSetFilePath:
         mockFile.read = Mock(return_value=mockMasterYaml)
@@ -115,11 +115,11 @@ class LiquipyDatabaseTest(unittest.TestCase):
       return mockFile
 
     mockOpen = mock_open()
-    mockOpen.side_effect = side_effect
+    mockOpen.side_effect = sideEffect
     mockListdir = Mock(return_value=['include1.yml', 'other.thing'])
 
     with patch('liquipy.db.open', mockOpen, create=True):
-      with patch('liquipy.db.listdir', mockListdir, create=True):
+      with patch('liquipy.db.os.listdir', mockListdir, create=True):
         changes = db.inputYamlToChangeSets(masterChangeSetFilePath)
 
     mockListdir.assert_called_once_with('/foo/bar/baz/migrations')
@@ -128,7 +128,7 @@ class LiquipyDatabaseTest(unittest.TestCase):
     self.assertNotIn(0, changeKeys)
     self.assertIn(1, changeKeys)
     self.assertNotIn(2, changeKeys)
-    # Just test the structure of one. Other tests around how change sets are 
+    # Just test the structure of one. Other tests around how change sets are
     # created from YAML input are in xmlwriter_test.py.
     changeOne = changes[1]
     self.assertIn('author', changeOne)
@@ -147,16 +147,21 @@ class LiquipyDatabaseTest(unittest.TestCase):
 
     db = Database()
 
-    def side_effect(filePath, mode):
+    def sideEffect(_filePath, _mode):
       mockFile = Mock()
       mockFile.read = Mock(return_value=mockMasterYaml)
       return mockFile
 
     mockOpen = mock_open()
-    mockOpen.side_effect = side_effect
+    mockOpen.side_effect = sideEffect
 
     with patch('liquipy.db.open', mockOpen, create=True):
-      with self.assertRaisesRegexp(Exception, 'Included directory "/foo/bar/baz/migrations" does not exist'):
-        changes = db.inputYamlToChangeSets(masterChangeSetFilePath)
+      with self.assertRaisesRegexp(
+          Exception,
+          "Included directory '/foo/bar/baz/migrations' does not exist"):
+        db.inputYamlToChangeSets(masterChangeSetFilePath)
 
 
+
+if __name__ == '__main__':
+  unittest.main()

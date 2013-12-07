@@ -12,85 +12,136 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import tempfile
 import yaml
-import sys
-from os import listdir
-from os.path import isfile, join, split
 
-from changeset import XMLWriter as ChangeSetWriter
-from executor import Executor as LiquibaseExecutor
+from liquipy.changeset import XMLWriter as ChangeSetWriter
+from liquipy.executor import Executor as LiquibaseExecutor
 
 DEFAULT = {
-  'host': "localhost",
-  'database': "liquipy_test",
-  'username': "root",
-  'password': "",
-  'tempDir': "/tmp"
+  "host": "localhost",
+  # TODO: we shouldn't have test settings in production code.
+  "database": "liquipy_test",
+  "username": "root",
+  "password": ""
 }
 
 class LiquipyDatabase(object):
   """
   Main interface for Liquipy
   """
+  
+  _GENERATED_CHANGELOG_FILE_NAME = "liquipy_changelog.xml"
+  """ This is the name of the generated changlog xml file """
 
-  def __init__(self, host=DEFAULT['host'],
-                     database=DEFAULT['database'],
-                     username=DEFAULT['username'],
-                     password=DEFAULT['password'],
-                     tempDir=DEFAULT['tempDir']):
-    self.liquibaseExecutor = LiquibaseExecutor(host, database, username, password)
+  def __init__(self, host=DEFAULT["host"],
+                     database=DEFAULT["database"],
+                     username=DEFAULT["username"],
+                     password=DEFAULT["password"],
+                     tempDir=None):
+    self.liquibaseExecutor = LiquibaseExecutor(host, database, username,
+                                               password)
     self.tempDir = tempDir
-    self.outputXmlChangeLogFilePath = self.tempDir + "/liquipy_changelog.xml"
-
+    self.changes = None
 
 
   def initialize(self, yamlPath):
     self.changes = self.inputYamlToChangeSets(yamlPath)
-    changeSetWriter = ChangeSetWriter(self.outputXmlChangeLogFilePath)
-    changeSetWriter.write(self.changes)
 
 
   def inputYamlToChangeSets(self, yamlPath):
-    rawYaml = open(yamlPath, 'r').read()
+    rawYaml = open(yamlPath, "r").read()
     try:
       changes = yaml.load(rawYaml)
     except yaml.scanner.ScannerError as e:
-      msg = "Error parsing input YAML file '%s':\n%s" % (yamlPath, e)
+      msg = "Error parsing input YAML file %r:\n%r" % (yamlPath, e)
       raise Exception(msg)
-    if 'include' in changes.keys():
-      relativeTargetDir = changes['include']['directory']
-      currentDir = join(split(yamlPath)[:-1])[0]
-      targetDir = join(currentDir,relativeTargetDir)
+    if "include" in changes.keys():
+      relativeTargetDir = changes["include"]["directory"]
+      currentDir = os.path.join(os.path.split(yamlPath)[:-1])[0]
+      targetDir = os.path.join(currentDir, relativeTargetDir)
       try:
-        dirFiles = listdir(targetDir)
-      except Exception:
-        raise Exception('Included directory "' + targetDir + '" does not exist')
-      migrationFiles = [ 
-        join(targetDir, f) 
+        dirFiles = os.listdir(targetDir)
+      except Exception as e:
+        raise Exception("Included directory %r does not exist (%r)" % (
+          targetDir, e))
+      migrationFiles = [
+        os.path.join(targetDir, f)
         for f in dirFiles
-        if f.endswith('.yml')
+        if f.endswith(".yml")
       ]
       for includedMigration in migrationFiles:
         includeChanges = self.inputYamlToChangeSets(includedMigration)
+        # TODO Need validation to make sure that the same ID is not reused!
+        #   Issue https://github.com/GrokSolutions/liquipy/issues/15
         changes.update(includeChanges)
-      del changes['include']
+      del changes["include"]
     return changes
+
+
+  def _getTempXMLChangeLogFilePath(self):
+    """
+    retval: filepath to be used for the generated ChangeLog XML file; MOTE: if
+      tempDir was not specified by the user via constructor (self.tempDir is
+      None), then an empty file will be created via tempfile.mkstemp as a
+      place-holder for avoiding tempfile race conditions, and the caller is
+      responsible for deleting that file
+    """
+    if self.tempDir is not None:
+      # Generate the path inside user-supplied tempDir
+      tempXMLChangeLogFilePath = os.path.join(
+        self.tempDir,
+        self._GENERATED_CHANGELOG_FILE_NAME)
+    else:
+      # Safely create a temp file and return its path
+      (tempFD, tempXMLChangeLogFilePath) = tempfile.mkstemp(
+        suffix=self._GENERATED_CHANGELOG_FILE_NAME)
+      # Don't need the fd, so close it
+      os.close(tempFD)
+    
+    return tempXMLChangeLogFilePath
 
 
   def update(self):
     print "Running all migrations..."
-    self.liquibaseExecutor.run(self.outputXmlChangeLogFilePath, 'update')
+    
+    tempXMLChangeLogFilePath = self._getTempXMLChangeLogFilePath()
+    try:
+      ChangeSetWriter(tempXMLChangeLogFilePath).write(self.changes)
+      
+      self.liquibaseExecutor.run(tempXMLChangeLogFilePath, "update")
+    except:
+      # On error, leave the genearted changelog file in place for debugging
+      raise
+    else:
+      # Delete the generated changelog file if the user didn't provide tempDir
+      if self.tempDir is None:
+        os.unlink(tempXMLChangeLogFilePath)
 
 
   def rollback(self, tagName):
     print "Rolling back to %s..." % (tagName,)
-    self.liquibaseExecutor.run(self.outputXmlChangeLogFilePath, 'rollback', tagName)
+    
+    tempXMLChangeLogFilePath = self._getTempXMLChangeLogFilePath()
+    try:
+      ChangeSetWriter(tempXMLChangeLogFilePath).write(self.changes)
+      
+      self.liquibaseExecutor.run(tempXMLChangeLogFilePath, "rollback",
+                                 tagName)
+    except:
+      # On error, leave the genearted changelog file in place for debugging
+      raise
+    else:
+      # Delete the generated changelog file if the user didn't provide tempDir
+      if self.tempDir is None:
+        os.unlink(tempXMLChangeLogFilePath)
 
 
   def getTags(self):
     return [
-      {'tag':self.changes[c]['tag'], 'changeSet': c} 
-      for c in self.changes.keys() 
-      if 'tag' in self.changes[c]
+      {"tag": self.changes[c]["tag"], "changeSet": c}
+      for c in self.changes.keys()
+      if "tag" in self.changes[c]
     ]
 

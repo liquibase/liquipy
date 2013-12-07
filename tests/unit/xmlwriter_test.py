@@ -1,10 +1,10 @@
-import os
+#!/usr/bin/env python
 import unittest2 as unittest
 
 from mock import patch, mock_open, MagicMock
 
-import liquipy
 from liquipy.changeset import XMLWriter
+
 
 class XMLWriterTest(unittest.TestCase):
   
@@ -18,6 +18,7 @@ class XMLWriterTest(unittest.TestCase):
 
     expected = """<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
+        logicalFilePath="liquipy_logical_changelog_path.xml"
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
@@ -49,7 +50,6 @@ Rollback
     self.assertEqual(expected, fileWriteArgs[0])
 
 
-
   def testOneSimpleChangeSetWithTagSuccess(self):
     changes = {'1': {
       'author': 'Author',
@@ -61,6 +61,7 @@ Rollback
 
     expected = """<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
+        logicalFilePath="liquipy_logical_changelog_path.xml"
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
@@ -95,7 +96,6 @@ Rollback
     self.assertEqual(expected, fileWriteArgs[0])
 
 
-
   def testManyChangeSetsSuccess(self):
     changes = {'1': {
       'author': 'Author 1',
@@ -123,6 +123,7 @@ Rollback
 
     expected = """<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
+        logicalFilePath="liquipy_logical_changelog_path.xml"
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
@@ -187,8 +188,6 @@ Rollback 4
     self.assertEqual(expected, fileWriteArgs[0])
 
 
-
-
   def testWriterRaisesExceptionWhenAuthorMissing(self):
     changes = {'1': {
       'comment': 'Comment',
@@ -199,7 +198,9 @@ Rollback 4
 
     writer = XMLWriter('')
 
-    with self.assertRaisesRegexp(Exception, 'ChangeSet "1" missing required attribute "author"'):
+    with self.assertRaisesRegexp(
+        Exception,
+        "ChangeSet '1' missing required attribute 'author'"):
       writer.write(changes)
 
 
@@ -213,7 +214,9 @@ Rollback 4
 
     writer = XMLWriter('')
 
-    with self.assertRaisesRegexp(Exception, 'ChangeSet "1" missing required attribute "comment"'):
+    with self.assertRaisesRegexp(
+      Exception,
+      "ChangeSet '1' missing required attribute 'comment'"):
       writer.write(changes)
 
 
@@ -227,7 +230,9 @@ Rollback 4
 
     writer = XMLWriter('')
 
-    with self.assertRaisesRegexp(Exception, 'ChangeSet "1" missing required attribute "sql"'):
+    with self.assertRaisesRegexp(
+        Exception,
+        "ChangeSet '1' missing required attribute 'sql'"):
       writer.write(changes)
 
 
@@ -241,5 +246,12 @@ Rollback 4
 
     writer = XMLWriter('')
 
-    with self.assertRaisesRegexp(Exception, 'ChangeSet "1" missing required attribute "rollback"'):
+    with self.assertRaisesRegexp(
+        Exception,
+        "ChangeSet '1' missing required attribute 'rollback'"):
       writer.write(changes)
+
+
+
+if __name__ == '__main__':
+  unittest.main()

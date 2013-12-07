@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from subprocess import Popen, PIPE, STDOUT
-from pkg_resources import Requirement, resource_filename
+import subprocess
+from pkg_resources import resource_filename
 
 RUN_TEMPLATE = """java -jar %s \
     --driver=com.mysql.jdbc.Driver \
@@ -36,27 +36,35 @@ class Executor(object):
     self.database = database
     self.username = username
     self.password = password
-    self.liquibaseJar = resource_filename(Requirement.parse('liquipy'), 'externals/liquibase.jar')
-    self.mysqlJar = resource_filename(Requirement.parse('liquipy'), 'externals/mysql-connector-java-5.1.17-bin.jar')
+    self.liquibaseJar = resource_filename(
+      __package__, "externals/liquibase.jar")
+    self.mysqlJar = resource_filename(
+      __package__,
+      "externals/mysql-connector-java-5.1.17-bin.jar")
 
 
   def run(self, changeLogFilePath, *args):
     cmd = RUN_TEMPLATE % (
-      self.liquibaseJar, self.mysqlJar, changeLogFilePath, self.host, self.database, self.username, self.password)
-    cmd = cmd + ' '.join(args)
-    # print('\n' + cmd + '\n')
+      self.liquibaseJar, self.mysqlJar, changeLogFilePath, self.host,
+      self.database, self.username, self.password)
+    cmd = cmd + " ".join(args)
+    # print("\n" + cmd + "\n")
 
-    p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, close_fds=True)
+    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT, close_fds=True)
+    # Use p.communicate() BEFORE p.wait() to avoid deadlock in case the process
+    # spits out more STDERR/STDOUT data than there is room for in the pipe's
+    # buffer (which is not that large)
+    (output, _stderr) = p.communicate()
     p.wait()
-    output = p.stdout.read()
 
-    if p.returncode > 0:
+    if p.returncode != 0:
       raise Exception("""
 
-Error running liquibase! See output below:
+Error running liquibase (returncode=%s)! See output below:
 
 %s
 The Liquibase XML changelog file used to perform this operation is here: %s
-""" % (output, changeLogFilePath)
+""" % (p.returncode, output, changeLogFilePath)
       )
     print output
