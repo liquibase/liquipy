@@ -58,16 +58,18 @@ class XMLWriter(object):
         changeSet['sql'], changeSet['rollback'])
       if 'tag' in changeSet:
         xmlOut += CHANGESET_TAG_TEMPLATE % (
-          str(changeSetId) + "-tag", 
-          'liquipy', 
+          str(changeSetId) + "-tag",
+          'liquipy',
           changeSet['tag'])
     xmlOut = ROOT_TEMPLATE % (xmlOut,)
 
     with open(self.outputFile, "w") as f:
       f.write(xmlOut)
-
-  def _validateChangeSet(self, id, changeSet, requiredAttributes):
+  
+  @classmethod
+  def _validateChangeSet(cls, changeSetId, changeSet, requiredAttributes):
     for attribute in requiredAttributes:
       if attribute not in changeSet:
-        raise Exception(('ChangeSet "%s" missing required attribute "%s"') % (str(id), attribute))
+        raise Exception(('ChangeSet "%s" missing required attribute "%s"') % (
+          str(changeSetId), attribute))
 

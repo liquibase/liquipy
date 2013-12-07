@@ -13,12 +13,11 @@
 # limitations under the License.
 
 import yaml
-import sys
 from os import listdir
-from os.path import isfile, join, split
+from os.path import join, split
 
-from changeset import XMLWriter as ChangeSetWriter
-from executor import Executor as LiquibaseExecutor
+from liquipy.changeset import XMLWriter as ChangeSetWriter
+from liquipy.executor import Executor as LiquibaseExecutor
 
 DEFAULT = {
   'host': "localhost",
@@ -38,9 +37,11 @@ class LiquipyDatabase(object):
                      username=DEFAULT['username'],
                      password=DEFAULT['password'],
                      tempDir=DEFAULT['tempDir']):
-    self.liquibaseExecutor = LiquibaseExecutor(host, database, username, password)
+    self.liquibaseExecutor = LiquibaseExecutor(host, database, username,
+                                               password)
     self.tempDir = tempDir
     self.outputXmlChangeLogFilePath = self.tempDir + "/liquipy_changelog.xml"
+    self.changes = None
 
 
 
@@ -60,13 +61,13 @@ class LiquipyDatabase(object):
     if 'include' in changes.keys():
       relativeTargetDir = changes['include']['directory']
       currentDir = join(split(yamlPath)[:-1])[0]
-      targetDir = join(currentDir,relativeTargetDir)
+      targetDir = join(currentDir, relativeTargetDir)
       try:
         dirFiles = listdir(targetDir)
       except Exception:
         raise Exception('Included directory "' + targetDir + '" does not exist')
-      migrationFiles = [ 
-        join(targetDir, f) 
+      migrationFiles = [
+        join(targetDir, f)
         for f in dirFiles
         if f.endswith('.yml')
       ]
@@ -84,13 +85,14 @@ class LiquipyDatabase(object):
 
   def rollback(self, tagName):
     print "Rolling back to %s..." % (tagName,)
-    self.liquibaseExecutor.run(self.outputXmlChangeLogFilePath, 'rollback', tagName)
+    self.liquibaseExecutor.run(self.outputXmlChangeLogFilePath, 'rollback',
+                               tagName)
 
 
   def getTags(self):
     return [
-      {'tag':self.changes[c]['tag'], 'changeSet': c} 
-      for c in self.changes.keys() 
+      {'tag':self.changes[c]['tag'], 'changeSet': c}
+      for c in self.changes.keys()
       if 'tag' in self.changes[c]
     ]
 

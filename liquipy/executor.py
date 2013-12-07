@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from subprocess import Popen, PIPE, STDOUT
-from pkg_resources import Requirement, resource_filename
+from pkg_resources import resource_filename
 
 RUN_TEMPLATE = """java -jar %s \
     --driver=com.mysql.jdbc.Driver \
@@ -36,15 +36,19 @@ class Executor(object):
     self.database = database
     self.username = username
     self.password = password
-    self.liquibaseJar = resource_filename(Requirement.parse('liquipy'), 'externals/liquibase.jar')
-    self.mysqlJar = resource_filename(Requirement.parse('liquipy'), 'externals/mysql-connector-java-5.1.17-bin.jar')
+    self.liquibaseJar = resource_filename(
+      __package__, "externals/liquibase.jar")
+    self.mysqlJar = resource_filename(
+      __package__,
+      "externals/mysql-connector-java-5.1.17-bin.jar")
 
 
   def run(self, changeLogFilePath, *args):
     cmd = RUN_TEMPLATE % (
-      self.liquibaseJar, self.mysqlJar, changeLogFilePath, self.host, self.database, self.username, self.password)
-    cmd = cmd + ' '.join(args)
-    # print('\n' + cmd + '\n')
+      self.liquibaseJar, self.mysqlJar, changeLogFilePath, self.host,
+      self.database, self.username, self.password)
+    cmd = cmd + " ".join(args)
+    # print("\n" + cmd + "\n")
 
     p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, close_fds=True)
     p.wait()
