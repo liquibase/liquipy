@@ -21,8 +21,7 @@ class LiquipySampleTest(unittest.TestCase):
     db = liquipy.Database(
       host="localhost",
       database="test_liquipy",
-      username="root",
-      tempDir=".")
+      username="root")
 
     db.initialize(self.pathToChangelog)
     
