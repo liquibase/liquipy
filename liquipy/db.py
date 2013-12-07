@@ -19,11 +19,11 @@ from liquipy.changeset import XMLWriter as ChangeSetWriter
 from liquipy.executor import Executor as LiquibaseExecutor
 
 DEFAULT = {
-  'host': "localhost",
-  'database': "liquipy_test",
-  'username': "root",
-  'password': "",
-  'tempDir': "/tmp"
+  "host": "localhost",
+  "database": "liquipy_test",
+  "username": "root",
+  "password": "",
+  "tempDir": "/tmp"
 }
 
 class LiquipyDatabase(object):
@@ -34,11 +34,11 @@ class LiquipyDatabase(object):
   _GENERATED_CHANGELOG_FILE_NAME = "liquipy_changelog.xml"
   """ This is the name of the generated changlog xml file """
 
-  def __init__(self, host=DEFAULT['host'],
-                     database=DEFAULT['database'],
-                     username=DEFAULT['username'],
-                     password=DEFAULT['password'],
-                     tempDir=DEFAULT['tempDir']):
+  def __init__(self, host=DEFAULT["host"],
+                     database=DEFAULT["database"],
+                     username=DEFAULT["username"],
+                     password=DEFAULT["password"],
+                     tempDir=DEFAULT["tempDir"]):
     self.liquibaseExecutor = LiquibaseExecutor(host, database, username,
                                                password)
     self.tempDir = tempDir
@@ -56,47 +56,48 @@ class LiquipyDatabase(object):
 
 
   def inputYamlToChangeSets(self, yamlPath):
-    rawYaml = open(yamlPath, 'r').read()
+    rawYaml = open(yamlPath, "r").read()
     try:
       changes = yaml.load(rawYaml)
     except yaml.scanner.ScannerError as e:
-      msg = "Error parsing input YAML file '%s':\n%s" % (yamlPath, e)
+      msg = "Error parsing input YAML file %r:\n%r" % (yamlPath, e)
       raise Exception(msg)
-    if 'include' in changes.keys():
-      relativeTargetDir = changes['include']['directory']
+    if "include" in changes.keys():
+      relativeTargetDir = changes["include"]["directory"]
       currentDir = os.path.join(os.path.split(yamlPath)[:-1])[0]
       targetDir = os.path.join(currentDir, relativeTargetDir)
       try:
         dirFiles = os.listdir(targetDir)
-      except Exception:
-        raise Exception('Included directory "' + targetDir + '" does not exist')
+      except Exception as e:
+        raise Exception("Included directory %r does not exist (%r)" % (
+          targetDir, e))
       migrationFiles = [
         os.path.join(targetDir, f)
         for f in dirFiles
-        if f.endswith('.yml')
+        if f.endswith(".yml")
       ]
       for includedMigration in migrationFiles:
         includeChanges = self.inputYamlToChangeSets(includedMigration)
         changes.update(includeChanges)
-      del changes['include']
+      del changes["include"]
     return changes
 
 
   def update(self):
     print "Running all migrations..."
-    self.liquibaseExecutor.run(self.outputXmlChangeLogFilePath, 'update')
+    self.liquibaseExecutor.run(self.outputXmlChangeLogFilePath, "update")
 
 
   def rollback(self, tagName):
     print "Rolling back to %s..." % (tagName,)
-    self.liquibaseExecutor.run(self.outputXmlChangeLogFilePath, 'rollback',
+    self.liquibaseExecutor.run(self.outputXmlChangeLogFilePath, "rollback",
                                tagName)
 
 
   def getTags(self):
     return [
-      {'tag':self.changes[c]['tag'], 'changeSet': c}
+      {"tag": self.changes[c]["tag"], "changeSet": c}
       for c in self.changes.keys()
-      if 'tag' in self.changes[c]
+      if "tag" in self.changes[c]
     ]
 
