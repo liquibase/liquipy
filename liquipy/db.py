@@ -13,8 +13,7 @@
 # limitations under the License.
 
 import yaml
-from os import listdir
-from os.path import join, split
+import os
 
 from liquipy.changeset import XMLWriter as ChangeSetWriter
 from liquipy.executor import Executor as LiquibaseExecutor
@@ -40,7 +39,8 @@ class LiquipyDatabase(object):
     self.liquibaseExecutor = LiquibaseExecutor(host, database, username,
                                                password)
     self.tempDir = tempDir
-    self.outputXmlChangeLogFilePath = self.tempDir + "/liquipy_changelog.xml"
+    self.outputXmlChangeLogFilePath = os.path.join(self.tempDir,
+                                                   "liquipy_changelog.xml")
     self.changes = None
 
 
@@ -60,14 +60,14 @@ class LiquipyDatabase(object):
       raise Exception(msg)
     if 'include' in changes.keys():
       relativeTargetDir = changes['include']['directory']
-      currentDir = join(split(yamlPath)[:-1])[0]
-      targetDir = join(currentDir, relativeTargetDir)
+      currentDir = os.path.join(os.path.split(yamlPath)[:-1])[0]
+      targetDir = os.path.join(currentDir, relativeTargetDir)
       try:
-        dirFiles = listdir(targetDir)
+        dirFiles = os.listdir(targetDir)
       except Exception:
         raise Exception('Included directory "' + targetDir + '" does not exist')
       migrationFiles = [
-        join(targetDir, f)
+        os.path.join(targetDir, f)
         for f in dirFiles
         if f.endswith('.yml')
       ]
