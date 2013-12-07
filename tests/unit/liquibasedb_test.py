@@ -157,7 +157,9 @@ class LiquipyDatabaseTest(unittest.TestCase):
     mockOpen.side_effect = side_effect
 
     with patch('liquipy.db.open', mockOpen, create=True):
-      with self.assertRaisesRegexp(Exception, 'Included directory "/foo/bar/baz/migrations" does not exist'):
+      with self.assertRaisesRegexp(
+          Exception,
+          "Included directory '/foo/bar/baz/migrations' does not exist"):
         changes = db.inputYamlToChangeSets(masterChangeSetFilePath)
 
 
