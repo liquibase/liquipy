@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import subprocess
+import logging
 from pkg_resources import resource_filename
+import subprocess
+
 
 RUN_TEMPLATE = """java -jar %s \
     --driver=com.mysql.jdbc.Driver \
@@ -24,6 +26,11 @@ RUN_TEMPLATE = """java -jar %s \
     --password=%s \
     --logLevel=info \
 """
+
+
+
+g_logger = logging.getLogger("liquipy.executor")
+
 
 
 class Executor(object):
@@ -48,7 +55,6 @@ class Executor(object):
       self.liquibaseJar, self.mysqlJar, changeLogFilePath, self.host,
       self.database, self.username, self.password)
     cmd = cmd + " ".join(args)
-    # print("\n" + cmd + "\n")
 
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT, close_fds=True)
@@ -67,4 +73,4 @@ Error running liquibase (returncode=%s)! See output below:
 The Liquibase XML changelog file used to perform this operation is here: %s
 """ % (p.returncode, output, changeLogFilePath)
       )
-    print output
+    g_logger.info("%s", output)
