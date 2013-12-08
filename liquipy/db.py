@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import os
 import tempfile
 import yaml
 
 from liquipy.changeset import XMLWriter as ChangeSetWriter
 from liquipy.executor import Executor as LiquibaseExecutor
+
+
 
 DEFAULT = {
   "host": "localhost",
@@ -26,6 +29,12 @@ DEFAULT = {
   "username": "root",
   "password": ""
 }
+
+
+
+g_logger = logging.getLogger("liquipy.db")
+
+
 
 class LiquipyDatabase(object):
   """
@@ -104,7 +113,8 @@ class LiquipyDatabase(object):
 
 
   def update(self):
-    print "Running all migrations..."
+    g_logger.info("Running all migrations on db=%s",
+                  self.liquibaseExecutor.database)
     
     tempXMLChangeLogFilePath = self._getTempXMLChangeLogFilePath()
     try:
@@ -121,7 +131,8 @@ class LiquipyDatabase(object):
 
 
   def rollback(self, tagName):
-    print "Rolling back to %s..." % (tagName,)
+    g_logger.info("Rolling back db=%s to tag=%s",
+                  self.liquibaseExecutor.database, tagName)
     
     tempXMLChangeLogFilePath = self._getTempXMLChangeLogFilePath()
     try:

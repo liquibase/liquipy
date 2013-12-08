@@ -2,7 +2,7 @@
 import os
 import unittest2 as unittest
 
-from mock import patch, ANY
+from mock import patch, ANY, Mock
 
 import liquipy
 from liquipy.executor import Executor as LiquibaseExecutor
@@ -17,6 +17,9 @@ class LiquipySampleTest(unittest.TestCase):
   def testSample(self, liquibaseExecutorClassMock):
     """ Simple unit test demonstrating common use, mirroring the bundled sample
     """
+    
+    liquibaseExecutorMock = liquibaseExecutorClassMock.return_value
+    liquibaseExecutorMock.database = Mock()
     
     db = liquipy.Database(
       host="localhost",
