@@ -21,7 +21,7 @@ RUN_TEMPLATE = """java -jar %s \
     --driver=com.mysql.jdbc.Driver \
     --classpath=%s \
     --changeLogFile=%s \
-    --url="jdbc:mysql://%s:%s/%s" \
+    --url="jdbc:mysql://%s/%s" \
     --username=%s \
     --password=%s \
     --logLevel=info \
@@ -38,9 +38,8 @@ class Executor(object):
   Executes Liquibase.
   """
 
-  def __init__(self, host, port, database, username, password):
+  def __init__(self, host, database, username, password):
     self.host = host
-    self.port = port
     self.database = database
     self.username = username
     self.password = password
@@ -53,7 +52,7 @@ class Executor(object):
 
   def run(self, changeLogFilePath, *args):
     cmd = RUN_TEMPLATE % (
-      self.liquibaseJar, self.mysqlJar, changeLogFilePath, self.host, self.port,
+      self.liquibaseJar, self.mysqlJar, changeLogFilePath, self.host,
       self.database, self.username, self.password)
     cmd = cmd + " ".join(args)
 

@@ -1,9 +1,8 @@
 import liquipy
 
 db = liquipy.Database(
-  host="localhost",
-  port="3306",
-  database="test_liquipy",
+  host="localhost", 
+  database="test_liquipy", 
   username="root",
   tempDir=".")
 

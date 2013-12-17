@@ -16,7 +16,7 @@ In Liquipy, a changelog is a list of database migrations in SQL that contain the
 
 Here's an example of a changelog with one changeset.
 
-    1:
+    1: 
       author: Richard Smoker
       comment: Creating happy table.
       tag: version-0.1
@@ -33,7 +33,7 @@ This changelog contains only one changeset. The id of the changeset is `1`. The 
 Here is another changelog with multiple changesets, comments, and more whitespace:
 
     # Sample migration 2
-    2:
+    2: 
       author: Rocky Racoon
       comment: Creating sad table.
 
@@ -49,7 +49,7 @@ Here is another changelog with multiple changesets, comments, and more whitespac
         DROP TABLE sad;
 
     # Sample migration 3
-    3:
+    3: 
       author: Richard Smoker
       comment: Adding grumpy column
       tag: "0.2"
@@ -65,7 +65,7 @@ Here is another changelog with multiple changesets, comments, and more whitespac
 
 ##### Changelog Includes
 
-Any changelog file may specify one inclusion at any point, which should point to a directory _relative to that file_ that includes further changelog files. Any YAML files (with the .yml extension) within this directory will be read and processed as if they were a part of the parent changelog.
+Any changelog file may specify one inclusion at any point, which should point to a directory _relative to that file_ that includes further changelog files. Any YAML files (with the .yml extension) within this directory will be read and processed as if they were a part of the parent changelog. 
 
 For example, imagine a directory stucture like this:
 
@@ -80,7 +80,7 @@ The contents of `master_changelog.yml` could simple contain an inclusion of the 
 
 **master_changelog.yml**
 
-    include:
+    include: 
       directory: changelogs
 
 This could allow users to break apart their changesets into temporal or other logical units. Changelogs included in this fashion can also themselves include other directories.
@@ -94,9 +94,8 @@ Each changeset has an id, which is the only ordering that matters. All changeset
     import liquipy
 
     db = liquipy.Database(
-      host="localhost",
-      port="3306",
-      database="my_database",
+      host="localhost", 
+      database="my_database", 
       username="your_username",
       password="your_password"
       tempDir=".")

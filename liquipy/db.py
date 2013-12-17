@@ -24,7 +24,6 @@ from liquipy.executor import Executor as LiquibaseExecutor
 
 DEFAULT = {
   "host": "localhost",
-  "port": "3306",
   # TODO: we shouldn't have test settings in production code.
   "database": "liquipy_test",
   "username": "root",
@@ -41,17 +40,16 @@ class LiquipyDatabase(object):
   """
   Main interface for Liquipy
   """
-
+  
   _GENERATED_CHANGELOG_FILE_NAME = "liquipy_changelog.xml"
   """ This is the name of the generated changlog xml file """
 
   def __init__(self, host=DEFAULT["host"],
-                     port=DEFAULT["port"],
                      database=DEFAULT["database"],
                      username=DEFAULT["username"],
                      password=DEFAULT["password"],
                      tempDir=None):
-    self.liquibaseExecutor = LiquibaseExecutor(host, port, database, username,
+    self.liquibaseExecutor = LiquibaseExecutor(host, database, username,
                                                password)
     self.tempDir = tempDir
     self.changes = None
@@ -110,18 +108,18 @@ class LiquipyDatabase(object):
         suffix=self._GENERATED_CHANGELOG_FILE_NAME)
       # Don't need the fd, so close it
       os.close(tempFD)
-
+    
     return tempXMLChangeLogFilePath
 
 
   def update(self):
     g_logger.info("Running all migrations on db=%s",
                   self.liquibaseExecutor.database)
-
+    
     tempXMLChangeLogFilePath = self._getTempXMLChangeLogFilePath()
     try:
       ChangeSetWriter(tempXMLChangeLogFilePath).write(self.changes)
-
+      
       self.liquibaseExecutor.run(tempXMLChangeLogFilePath, "update")
     except:
       # On error, leave the genearted changelog file in place for debugging
@@ -135,11 +133,11 @@ class LiquipyDatabase(object):
   def rollback(self, tagName):
     g_logger.info("Rolling back db=%s to tag=%s",
                   self.liquibaseExecutor.database, tagName)
-
+    
     tempXMLChangeLogFilePath = self._getTempXMLChangeLogFilePath()
     try:
       ChangeSetWriter(tempXMLChangeLogFilePath).write(self.changes)
-
+      
       self.liquibaseExecutor.run(tempXMLChangeLogFilePath, "rollback",
                                  tagName)
     except:
