@@ -46,7 +46,7 @@ sdict.update({
     'Development Status :: 1 - Planning',
     'Environment :: Console',
     'Intended Audience :: Developers',
-    'License :: OSI Approved :: Apache License',
+    'License :: OSI Approved :: Apache Software License',
     'Natural Language :: English',
     'Operating System :: OS Independent',
     'Programming Language :: Python'],
