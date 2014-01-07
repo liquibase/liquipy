@@ -1,4 +1,4 @@
-# Copyright 2013 Numenta
+# Copyright 2014 Numenta
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,12 +56,12 @@ class XMLWriter(object):
   """
   Writes a changeset to XML in the proper format for Liquibase.
   """
-  
+
   _LOGICAL_CHANGELOG_FILE_PATH = "liquipy_logical_changelog_path.xml"
   """ Logical file path to associate with the generated liquibase changelog.
   NOTE: this value MUST NEVER CHANGE! Changing it will cause all previously-
   executed changesets to be re-executed.
-  
+
   EXPLANATION: The never-changing logical file path is needed because liquibase
   uses the changelog filepath, along with the changeset's md5 checksum and other
   attributes, to uniquely identify executed changesets when determining whether
@@ -97,7 +97,7 @@ class XMLWriter(object):
 
     with open(self.outputFile, "w") as f:
       f.write(xmlOut)
-  
+
   @classmethod
   def _validateChangeSet(cls, changeSetId, changeSet, requiredAttributes):
     for attribute in requiredAttributes:
